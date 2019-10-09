@@ -78,15 +78,43 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
-app.post('/login', (req, res, next) => {
-  // determine if they actually are a user in the database
-  // if they don't exist we need to send them to the signup page
-  // we need the username and the password
+// THINGS TO CONSIDER FROM LEARN
+// your database model methods should not receive as arguments or otherwise have access to
+// the request or response objects
 
-  // test if they are correct
-  // if they are correct update the session
-  // redirect to the homepage
-  req.body.username
+app.post('/login', (req, res, next) => {
+  let username = req.body.username;
+  let attempted = req.body.password;
+  // determine if they actually are a user in the database
+  return models.Users.get({username})
+    .then(user =>{
+      if (!user) {
+        // if they don't exist we need to send them to the signup page?
+        // but the tests are written such that the user is redirected to login page
+        res.redirect('/login');
+      } else {
+        // we need the username and the password
+        // test if they are correct
+        return user;
+      }
+    })
+    .then((record) => {
+      console.log("RECORD", record);
+      return models.Users.compare(attempted, record.password, record.salt);
+      // if (!models.Users.compare({attempted, record.password, record.salt})) {
+      //   res.redirect('/login');
+      // }
+    })
+    .then((rightPassword) => {
+      // if they are correct update the session?
+      if (!rightPassword) {
+        res.redirect('/login');
+      } else {
+        // redirect to the homepage
+        res.redirect('/');
+      }
+    })
+    next();
 });
 
 app.post('/signup', (req, res, next) => {
@@ -94,34 +122,31 @@ app.post('/signup', (req, res, next) => {
   // check if the user is in the database already
   let username = req.body.username;
 
+  // get(options) → {Promise.<Object>}
   return models.Users.get({username})
-  .tap(user => {
+  .then(user => {
     console.log('GET USER RESULTS:', user);
-    if (!user) {
-      // Otherwise
-      // add user to database
-      return models.Users.create(req.body);
-      next();
+    if (user) {
+      // // Otherwise
+      // // add user to database
+      // return models.Users.create(req.body);
+      // next();
+      res.redirect('/signup')
     } else {
-      console.log("RESULTS", user.username);
+      return models.Users.create(req.body);
       // if they are in the database, redirect to login
     }
-    })
-    .then(results => {
+  })
+  .then(results => {
       console.log('CREATED USER');
+      res.redirect('/');
       next();
-    })
-    .catch((err) => {
+  })
+  .catch((err) => {
       throw err;
-    });
-
-  // WORKING UP TO DUPLICATE USERS
-  // models.Users.create(req.body)
-  //   .then((results) => {
-  //     console.log('RESULTS FROM CREATED USER', results);
-  //   })
-  // upgrade the session
-  // redirect to homepage
+  });
+  // Getting HTTP error:
+  // Unhandled rejection Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
 });
 
 /************************************************************/
