@@ -52,12 +52,10 @@ class Model {
    */
   get(options) {
     let parsedOptions = parseData(options);
-    console.log(parsedOptions);
     let queryString = `SELECT * FROM ${this.tablename} WHERE ${parsedOptions.string.join(' AND ')} LIMIT 1`;
     // let queryString = `SELECT * FROM ${this.tablename} WHERE username = ?`;
-    console.log('QUERY',queryString);
     return executeQuery(queryString, parsedOptions.values).then(results => {
-      console.log(results);
+      console.log('QUERY RESULTS:',results[0]);
       results[0];
     });
   }

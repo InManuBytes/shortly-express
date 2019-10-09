@@ -82,6 +82,7 @@ app.post('/login', (req, res, next) => {
   // determine if they actually are a user in the database
   // if they don't exist we need to send them to the signup page
   // we need the username and the password
+
   // test if they are correct
   // if they are correct update the session
   // redirect to the homepage
@@ -92,27 +93,33 @@ app.post('/signup', (req, res, next) => {
   console.log("REQ.BODY",req.body); // { username: 'Samantha', password: 'Samantha' }
   // check if the user is in the database already
   let username = req.body.username;
-  // HARD CODING QUERY WITH ADDING PRIVATE FUNCTION INTO MODEL DIDN'T WORK
-  // models.Users.executeQuery(`SELECT * from users where username = ?`,[username])
-  //   .then(results => {
-  //     console.log("RESULTS", results)
-  //   });
-  // return models.Users.get({username})
-  //   .then(results => {
-  //     console.log("RESULTS", results);
-  //   })
-  //   .catch((err) => {
-  //     throw err;
-  //   });
-  // if they are in the database, redirect to login
-  // Otherwise
-  // add user to database
-  // WORKING UP TO DUPLICATE USERS
-  models.Users.create(req.body)
-    .then((results) => {
-      console.log('RESULTS FROM CREATED USER', results);
+
+  return models.Users.get({username})
+  .tap(user => {
+    console.log('GET USER RESULTS:', user);
+    if (!user) {
+      // Otherwise
+      // add user to database
+      return models.Users.create(req.body);
+      next();
+    } else {
+      console.log("RESULTS", user.username);
+      // if they are in the database, redirect to login
+    }
     })
-  next();
+    .then(results => {
+      console.log('CREATED USER');
+      next();
+    })
+    .catch((err) => {
+      throw err;
+    });
+
+  // WORKING UP TO DUPLICATE USERS
+  // models.Users.create(req.body)
+  //   .then((results) => {
+  //     console.log('RESULTS FROM CREATED USER', results);
+  //   })
   // upgrade the session
   // redirect to homepage
 });
