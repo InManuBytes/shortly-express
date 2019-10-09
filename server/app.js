@@ -1,10 +1,10 @@
 const express = require('express');
 const path = require('path');
-const utils = require('./lib/hashUtils');
+const utils = require('./lib/hashUtils'); // unique to this app
 const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
-const models = require('./models');
+const models = require('./models'); //unique to this app
 
 const app = express();
 
@@ -16,18 +16,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
 
-
-app.get('/', 
+// all routes here
+app.get('/',
 (req, res) => {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 (req, res) => {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 (req, res, next) => {
   models.Links.getAll()
     .then(links => {
@@ -38,7 +38,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
+app.post('/links',
 (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
@@ -78,7 +78,44 @@ app.post('/links',
 // Write your authentication routes here
 /************************************************************/
 
+app.post('/login', (req, res, next) => {
+  // determine if they actually are a user in the database
+  // if they don't exist we need to send them to the signup page
+  // we need the username and the password
+  // test if they are correct
+  // if they are correct update the session
+  // redirect to the homepage
+  req.body.username
+});
 
+app.post('/signup', (req, res, next) => {
+  console.log("REQ.BODY",req.body); // { username: 'Samantha', password: 'Samantha' }
+  // check if the user is in the database already
+  let username = req.body.username;
+  // HARD CODING QUERY WITH ADDING PRIVATE FUNCTION INTO MODEL DIDN'T WORK
+  // models.Users.executeQuery(`SELECT * from users where username = ?`,[username])
+  //   .then(results => {
+  //     console.log("RESULTS", results)
+  //   });
+  // return models.Users.get({username})
+  //   .then(results => {
+  //     console.log("RESULTS", results);
+  //   })
+  //   .catch((err) => {
+  //     throw err;
+  //   });
+  // if they are in the database, redirect to login
+  // Otherwise
+  // add user to database
+  // WORKING UP TO DUPLICATE USERS
+  models.Users.create(req.body)
+    .then((results) => {
+      console.log('RESULTS FROM CREATED USER', results);
+    })
+  next();
+  // upgrade the session
+  // redirect to homepage
+});
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
