@@ -12,25 +12,55 @@ const parseCookies = require('./cookieParser.js');
 
 module.exports.createSession = (req, res, next) => {
   // check for cookies
-  console.log("REQUEST", req, "COOKIES",req.headers);
-  if (req.headers.cookie === undefined) {
+  if (Object.keys(req.cookies).length === 0) {
     // if there are no cookies on the request
     // make a new session
     return models.Sessions.create()
       .then((results) => {
-        console.log("RESULT OF SESSIONS.CREATE", results.insertId);
+        console.log("SESSION CREATE RESULTS", results);
         var id = results.insertId;
         return models.Sessions.get({id: id});
       })
       .then((record) => {
-        console.log("RECORD", record);
         req.session = {'hash': record.hash}
-        next();
+        return record.hash;
       })
-    // set a cookie in the response headers: session.hash req session: {hash}
-    // req.session = {'hash': "this should be the session hash"};
-    res.cookie('session', 'hash');
-    //console.log(res);
+      .then((hash) => {
+        res.cookie('shortlyid', hash);
+        next();
+      });
+  } else {
+    //console.log("GOT COOKIES", req.cookies);// {shortlyid: 'hash'}
+    return models.Sessions.get({hash: req.cookies.shortlyid})
+      .then((record) => {
+        //console.log("RECORD FROM GET", record);
+        if (record === undefined) {
+          res.clearCookie('shortlyid');
+          return models.Sessions.create()
+            .then((results) => {
+              var id = results.insertId;
+              return models.Sessions.get({id: id});
+            })
+            .then((record) => {
+              res.cookie('shortlyid', record.hash)
+              next();
+            })
+        } else {
+          req.session = {'hash': record.hash}
+          return record;
+        }
+      })
+      .then((record) => {
+        req.session.userId = record.userId;
+        if (record.user) {
+          req.session.user = {};
+          console.log('SESSION:', req.session);
+          req.session.user['username'] = record.user.username;
+        }
+        console.log('ASSIGNED USERNAME', req.session);
+        //req.session.user = {username: record.user.username};
+        next();
+      });
   }
   // if there are cookies
   // verify the cookie is valid
