@@ -99,7 +99,7 @@ app.post('/login', (req, res, next) => {
       }
     })
     .then((record) => {
-      console.log("RECORD", record);
+      //console.log("RECORD", record);
       return models.Users.compare(attempted, record.password, record.salt);
       // if (!models.Users.compare({attempted, record.password, record.salt})) {
       //   res.redirect('/login');
@@ -118,14 +118,14 @@ app.post('/login', (req, res, next) => {
 });
 
 app.post('/signup', (req, res, next) => {
-  console.log("REQ.BODY",req.body); // { username: 'Samantha', password: 'Samantha' }
+  //console.log("REQ.BODY",req.body); // { username: 'Samantha', password: 'Samantha' }
   // check if the user is in the database already
   let username = req.body.username;
 
   // get(options) → {Promise.<Object>}
   return models.Users.get({username})
   .then(user => {
-    console.log('GET USER RESULTS:', user);
+    //console.log('GET USER RESULTS:', user);
     if (user) {
       // // Otherwise
       // // add user to database
@@ -138,7 +138,7 @@ app.post('/signup', (req, res, next) => {
     }
   })
   .then(results => {
-      console.log('CREATED USER');
+      //console.log('CREATED USER');
       res.redirect('/');
       next();
   })

@@ -16,20 +16,20 @@
 const _ = require('lodash');
 
 const parseCookies = (req, res, next) => {
-  console.log("REQUEST",req);
+  //console.log("REQUEST",req);
   // since the cookies are stored as a string split up by semicolons
-  // you'd first want to split the individual cookiessee line 14
+  // you'd first want to split the individual cookies see line 14
   let cookies = (req === undefined || req.headers.cookie === undefined) ? {} : req.headers.cookie.split("; ");
   // let cookieArray = (cookie) ? cookie.split(";") : [];
   // let cookieObject = {};
   // (cookie) ? cookieObject[cookieArray[0]] = cookieArray[1] : cookieObject = {};
   var parsedCookies = _.reduce(cookies, (acc, cookie) => {
-      console.log(cookie);
+      //console.log(cookie);
       cookie = cookie.split("=");
-      acc[cookie[0]] = cookie[1]
+      acc[cookie[0]] = cookie[1];
       return acc;
     }, {})
-  console.log("PARSED COOKIES", parsedCookies);
+  //console.log("PARSED COOKIES", parsedCookies);
   //assign this object to a cookies property on the request
   req.cookies = parsedCookies;
   next();
