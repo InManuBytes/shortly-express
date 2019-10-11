@@ -1,6 +1,5 @@
 const models = require('../models');
 const Promise = require('bluebird');
-const parseCookies = require('./cookieParser.js');
 
 // In middleware/auth.js, write a createSession middleware function that accesses the parsed cookies on the request, looks up the user data related to that session, and assigns an object to a session property on the request that contains relevant user information. (Ask yourself: what information about the user would you want to keep in this session object?) -- Stuff related to links?
 // Things to keep in mind:
@@ -22,7 +21,7 @@ module.exports.createSession = (req, res, next) => {
         return models.Sessions.get({id: id});
       })
       .then((record) => {
-        req.session = {'hash': record.hash}
+        req.session = {'hash': record.hash};
         return record.hash;
       })
       .then((hash) => {
@@ -42,11 +41,11 @@ module.exports.createSession = (req, res, next) => {
               return models.Sessions.get({id: id});
             })
             .then((record) => {
-              res.cookie('shortlyid', record.hash)
+              res.cookie('shortlyid', record.hash);
               next();
-            })
+            });
         } else {
-          req.session = {'hash': record.hash}
+          req.session = {'hash': record.hash};
           return record;
         }
       })
@@ -73,4 +72,11 @@ module.exports.createSession = (req, res, next) => {
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
-
+module.export.verifySession = (req, res, next) => {
+  if(req.path === '/') return next();
+  // authenticate user
+  // feed isLoggedIn function a session
+  // is logged in === false, redirect to login
+  // otherwise, continue
+  nest();
+};
