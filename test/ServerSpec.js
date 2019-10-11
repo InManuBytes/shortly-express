@@ -24,7 +24,7 @@ describe('', function() {
   var clearDB = function(connection, tablenames, done) {
     var count = 0;
     tablenames.forEach(function(tablename) {
-     connection.query('DROP TABLE IF EXISTS ' + tablename, function() {
+      connection.query('DROP TABLE IF EXISTS ' + tablename, function() {
         count++;
         if (count === tablenames.length) {
           return schema(db).then(done);

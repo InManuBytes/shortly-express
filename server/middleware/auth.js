@@ -73,7 +73,9 @@ module.exports.createSession = (req, res, next) => {
 // Add additional authentication middleware functions below
 /************************************************************/
 module.export.verifySession = (req, res, next) => {
-  if(req.path === '/') return next();
+  if (req.path === '/') {
+    return next();
+  }
   // authenticate user
   // feed isLoggedIn function a session
   // is logged in === false, redirect to login

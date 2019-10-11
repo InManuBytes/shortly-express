@@ -52,8 +52,9 @@ class Sessions extends Model {
    */
   create() {
     let data = utils.createRandom32String();
-    let hash = utils.createHash(data);
-    return super.create.call(this, { hash });
+    // exports.createHash = (data, salt = '')
+    let hash = utils.createHash(data); // no salt
+    return super.create.call(this, { hash }); // inserts into table
   }
 }
 
