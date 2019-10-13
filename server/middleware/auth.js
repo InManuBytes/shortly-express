@@ -11,16 +11,7 @@ const Promise = require('bluebird');
 
 module.exports.createSession = (req, res, next) => {
   // var username = req.body.username;
-  // TRYING to link Users table with Session here seems to be the wrong route
-  // if (req.body.username) {
-    //   // if they come in with username -> they are already loggedin?
-    //   // their user id, set that in options
-    //   // otherwise options
-    //   //console.log("USERNAME", req.body.username);
-    //   models.Users.get({username}).then((results) => {
-      //     console.log("USER FIRST BLOCK", results);
-      //   })
-      // }
+  // TRYING to link Users table with Session here was the wrong route
   // check for cookies
   if (Object.keys(req.cookies).length === 0) {
     console.log("DIDN\'T FIND COOKIES, CREATING A NEW SESSION");
@@ -32,7 +23,7 @@ module.exports.createSession = (req, res, next) => {
       .then((record) => {
         console.log('VALIDATING COOKIES');
         if (record === undefined) {
-          console.log('COOKIES NOT FROM SHORTLY:',req.cookies,'CLEARING COOKIES AND CREATING NEW SESSION');
+          console.log('INVALID COOKIE:',req.cookies,'CLEARING COOKIES AND CREATING NEW SESSION');
           res.clearCookie('shortlyid');
           return module.exports._createNewSessionSetCookies(req, res, next);
         } else {
@@ -79,7 +70,7 @@ module.exports._createNewSessionSetCookies = (req, res, next) => {
       return record.hash;
     })
     .then((hash) => {
-      console.log('SETTTING COOKIES');
+      console.log('SETTTING COOKIES HASH:', hash);
       res.cookie('shortlyid', hash);
       next();
     });

@@ -85,12 +85,26 @@ app.post(
 // THINGS TO CONSIDER FROM LEARN
 // your database model methods should not receive as arguments or otherwise have access to
 // the request or response objects
-app.get("/login", (req, res) => {
+app.get('/login', (req, res) => {
   res.render("login");
 });
 
-app.get("/signup", (req, res) => {
-  res.render("signup");
+app.get('/signup', (req, res) => {
+  res.render('signup');
+});
+
+// creating a new route for logging out
+app.get('/logout', (req, res, next) => {
+  // destroys session and cookies when logs out
+  return models.Sessions.delete({hash: req.session.hash})
+    .then(logout => {
+      console.log('LOGOUT', logout);
+      res.clearCookie('shortlyid');
+      next();
+    })
+    .catch(err => {
+      throw err;
+    });
 });
 
 app.post("/login", (req, res, next) => {
@@ -147,12 +161,12 @@ app.post("/signup", (req, res, next) => {
         // it would go into the other ".then"s and try to redirect the user again to res.redirect('/')
         return models.Users.create(req.body)
           .then(user => {
-            // after we create a new user we want to create a new session for them?
+            // after we create a new user we want to update their session
             var userId = user.insertId;
-            console.log("USER CREATED - CREATING A SESSION FOR USER ID:", userId, 'SESSION', req.session);
+            console.log("USER CREATED - CREATING A SESSION FOR USER ID:", userId, 'SESSION', req.session.hash);
             return models.Sessions.update({hash: req.session.hash}, {userId: userId})
               .then(update => {
-                console.log("CREATED USER AND ASSIGNED SESSION", update);
+                console.log("CREATED USER AND ASSIGNED SESSION", update.message);
                 res.redirect("/");
                 next();
               });
