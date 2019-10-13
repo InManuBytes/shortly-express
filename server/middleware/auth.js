@@ -53,13 +53,8 @@ module.exports.createSession = (req, res, next) => {
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
-<<<<<<< HEAD
 module.exports.verifySession = (req, res, next) => {
-  if(req.path === '/') {
-=======
-module.export.verifySession = (req, res, next) => {
   if (req.path === '/') {
->>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
     return next();
   }
   // authenticate user
