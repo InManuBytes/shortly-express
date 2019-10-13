@@ -10,73 +10,77 @@ const Promise = require('bluebird');
 
 
 module.exports.createSession = (req, res, next) => {
+  // var username = req.body.username;
+  // TRYING to link Users table with Session here seems to be the wrong route
+  // if (req.body.username) {
+    //   // if they come in with username -> they are already loggedin?
+    //   // their user id, set that in options
+    //   // otherwise options
+    //   //console.log("USERNAME", req.body.username);
+    //   models.Users.get({username}).then((results) => {
+      //     console.log("USER FIRST BLOCK", results);
+      //   })
+      // }
   // check for cookies
   if (Object.keys(req.cookies).length === 0) {
-    // if there are no cookies on the request
-    // make a new session
-    return models.Sessions.create()
-      .then((results) => {
-        console.log("SESSION CREATE RESULTS", results);
-        var id = results.insertId;
-        return models.Sessions.get({id: id});
-      })
-      .then((record) => {
-        req.session = {'hash': record.hash};
-        return record.hash;
-      })
-      .then((hash) => {
-        res.cookie('shortlyid', hash);
-        next();
-      });
+    console.log("DIDN\'T FIND COOKIES, CREATING A NEW SESSION");
+    // if there are no cookies on the request make a new session
+    return module.exports._createNewSessionSetCookies(req, res, next);
   } else {
-    //console.log("GOT COOKIES", req.cookies);// {shortlyid: 'hash'}
+    console.log('FOUND COOKIES', req.cookies);// {shortlyid: 'hash'}
     return models.Sessions.get({hash: req.cookies.shortlyid})
       .then((record) => {
-        //console.log("RECORD FROM GET", record);
+        console.log('VALIDATING COOKIES');
         if (record === undefined) {
+          console.log('COOKIES NOT FROM SHORTLY:',req.cookies,'CLEARING COOKIES AND CREATING NEW SESSION');
           res.clearCookie('shortlyid');
-          return models.Sessions.create()
-            .then((results) => {
-              var id = results.insertId;
-              return models.Sessions.get({id: id});
-            })
-            .then((record) => {
-              res.cookie('shortlyid', record.hash);
-              next();
-            });
+          return module.exports._createNewSessionSetCookies(req, res, next);
         } else {
+          console.log('COOKIES VALID, ASSIGNING SESSION');
           req.session = {'hash': record.hash};
-          return record;
+          req.session.userId = record.userId;
+          if (record.user) {
+            req.session.user = {};
+            console.log('SESSION:', req.session);
+            req.session.user['username'] = record.user.username;
+          }
         }
-      })
-      .then((record) => {
-        req.session.userId = record.userId;
-        if (record.user) {
-          req.session.user = {};
-          console.log('SESSION:', req.session);
-          req.session.user['username'] = record.user.username;
-        }
-        console.log('ASSIGNED USERNAME', req.session);
-        //req.session.user = {username: record.user.username};
         next();
       });
   }
-  // if there are cookies
-  // verify the cookie is valid
-  // get the value
-  // use that value to access data
-  // assigns an object to a session property on the request that contains relevant user information
-  next();
 };
 
 /************************************************************/
 // Add additional authentication middleware functions below
 /************************************************************/
-module.export.verifySession = (req, res, next) => {
-  if(req.path === '/') return next();
+module.exports.verifySession = (req, res, next) => {
+  if(req.path === '/') {
+    return next();
+  }
   // authenticate user
   // feed isLoggedIn function a session
   // is logged in === false, redirect to login
   // otherwise, continue
-  nest();
+  next();
+};
+
+// we called in a bit of code twice, so we can make a private function to handle
+// creating a new session record and setting cookies on the response
+module.exports._createNewSessionSetCookies = (req, res, next) => {
+  return models.Sessions.create() // creates a random string with hash then calls super Create (model)
+    .then((results) => {
+      var id = results.insertId;
+      console.log("SESSION CREATED AT sessionId", id);
+      return models.Sessions.get({id: id});
+    })
+    .then((record) => {
+      console.log("SESSION RECORD", record);
+      req.session = {'hash': record.hash};
+      return record.hash;
+    })
+    .then((hash) => {
+      console.log('SETTTING COOKIES');
+      res.cookie('shortlyid', hash);
+      next();
+    });
 };
