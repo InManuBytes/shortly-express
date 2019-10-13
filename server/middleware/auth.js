@@ -45,14 +45,14 @@ module.exports.createSession = (req, res, next) => {
 // Add additional authentication middleware functions below
 /************************************************************/
 module.exports.verifySession = (req, res, next) => {
-  if (req.path === '/') {
-    return next();
+  //Require users to log in to see shortened links and create new ones.
+  // Do NOT require the user to login when using a previously shortened link.
+  if (req.path === '/:code' || models.Sessions.isLoggedIn(req.session)) {
+    next();
+  } else {
+    res.redirect('/login');
+    next();
   }
-  // authenticate user
-  // feed isLoggedIn function a session
-  // is logged in === false, redirect to login
-  // otherwise, continue
-  next();
 };
 
 // we called in a bit of code twice, so we can make a private function to handle

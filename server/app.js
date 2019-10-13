@@ -19,16 +19,20 @@ app.use(cookieParser);
 app.use(Auth.createSession);
 
 // all routes here
-app.get("/", (req, res) => {
+app.get("/",
+  Auth.verifySession,
+  (req, res) => {
   res.render("index");
 });
 
-app.get("/create", (req, res) => {
+app.get("/create",
+  Auth.verifySession,
+  (req, res) => {
   res.render("index");
 });
 
 app.get(
-  "/links", //add here
+  "/links", Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -41,7 +45,7 @@ app.get(
 );
 
 app.post(
-  "/links", // add here
+  "/links", Auth.verifySession,
   (req, res, next) => {
     var url = req.body.url;
     if (!models.Links.isValidUrl(url)) {
