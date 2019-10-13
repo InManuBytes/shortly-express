@@ -17,10 +17,15 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 app.use(cookieParser);
 app.use(Auth.createSession);
+<<<<<<< HEAD
+=======
+app.use(Auth.verifySession);
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
 
 // all routes here
 app.get("/", (req, res) => {
   res.render("index");
+<<<<<<< HEAD
 });
 
 app.get("/create", (req, res) => {
@@ -42,35 +47,64 @@ app.post("/links", (req, res, next) => {
   if (!models.Links.isValidUrl(url)) {
     // send back a 404 if link is not valid
     return res.sendStatus(404);
-  }
-
-  return models.Links.get({ url })
-    .then(link => {
-      if (link) {
-        throw link;
-      }
-      return models.Links.getUrlTitle(url);
-    })
-    .then(title => {
-      return models.Links.create({
-        url: url,
-        title: title,
-        baseUrl: req.headers.origin
-      });
-    })
-    .then(results => {
-      return models.Links.get({ id: results.insertId });
-    })
-    .then(link => {
-      throw link;
-    })
-    .error(error => {
-      res.status(500).send(error);
-    })
-    .catch(link => {
-      res.status(200).send(link);
-    });
+=======
 });
+
+app.get("/create", (req, res) => {
+  res.render("index");
+});
+
+app.get(
+  "/links", //add here
+  (req, res, next) => {
+    models.Links.getAll()
+      .then(links => {
+        res.status(200).send(links);
+      })
+      .error(error => {
+        res.status(500).send(error);
+      });
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
+  }
+);
+
+app.post(
+  "/links", // add here
+  (req, res, next) => {
+    var url = req.body.url;
+    if (!models.Links.isValidUrl(url)) {
+      // send back a 404 if link is not valid
+      return res.sendStatus(404);
+    }
+
+    return models.Links.get({ url })
+      .then(link => {
+        if (link) {
+          throw link;
+        }
+        return models.Links.getUrlTitle(url);
+      })
+      .then(title => {
+        return models.Links.create({
+          url: url,
+          title: title,
+          baseUrl: req.headers.origin
+        });
+      })
+      .then(results => {
+        return models.Links.get({ id: results.insertId });
+      })
+      .then(link => {
+        throw link;
+      })
+      .error(error => {
+        res.status(500).send(error);
+      })
+      .catch(link => {
+        res.status(200).send(link);
+      });
+  }
+);
 
 /************************************************************/
 // Write your authentication routes here
@@ -87,32 +121,56 @@ app.get("/signup", (req, res) => {
   res.render("signup");
 });
 
+<<<<<<< HEAD
 app.post("/login", (req, res, next) => {
+=======
+app.post("/login", Auth.verifySession, (req, res, next) => {
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
   let username = req.body.username;
   let attempted = req.body.password;
   // determine if they actually are a user in the database
   return models.Users.get({ username })
     .then(user => {
+<<<<<<< HEAD
       console.log("LOGGING IN - LOOKING UP USER, FOUND:", user);
+=======
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
       if (!user) {
         console.log("DID NOT FIND USER:", username);
         // if they don't exist we need to send them to the signup page?
         // but the tests are written such that the user is redirected to login page
+<<<<<<< HEAD
         // we're going to go into the next .then so we can send a value to test for
         return null;
+=======
+        res.redirect("/login");
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
       } else {
         console.log("FOUND USER, CHECKING PASSWORD");
         return models.Users.compare(attempted, user.password, user.salt);
       }
     })
+<<<<<<< HEAD
     .then(rightPassword => {
       // if the password came in null it's because the username wasn't found
       if (!rightPassword) {
         console.log("USER DOESN\'T EXIST OR WRONG PASSWORD");
+=======
+    .then(record => {
+      //console.log("RECORD", record);
+      return models.Users.compare(attempted, record.password, record.salt);
+      // if (!models.Users.compare({attempted, record.password, record.salt})) {
+      //   res.redirect('/login');
+      // }
+    })
+    .then(rightPassword => {
+      if (!rightPassword) {
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
         res.redirect("/login");
       } else {
         // if they are correct update the session?
         // redirect to the homepage
+<<<<<<< HEAD
         console.log("RIGHT PASSWORD");
         res.redirect("/");
       }
@@ -121,11 +179,18 @@ app.post("/login", (req, res, next) => {
     .catch(err => {
       throw err;
     });
+=======
+        res.redirect("/");
+      }
+    });
+  next();
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
 });
 
 app.post("/signup", (req, res, next) => {
   //console.log("REQ.BODY",req.body); // { username: 'Samantha', password: 'Samantha' }
   let username = req.body.username;
+<<<<<<< HEAD
   // check if the user is already in the database
   return models.Users.get({ username }) // get(options) → {Promise.<Object>}
     .then(user => {
@@ -155,10 +220,33 @@ app.post("/signup", (req, res, next) => {
             next();
           });
       } // end of block for creating new users
+=======
+
+  // get(options) → {Promise.<Object>}
+  return models.Users.get({ username })
+    .then(user => {
+      //console.log('GET USER RESULTS:', user);
+      if (user) {
+        // // Otherwise
+        // // add user to database
+        // return models.Users.create(req.body);
+        // next();
+        res.redirect("/signup");
+      } else {
+        return models.Users.create(req.body);
+        // if they are in the database, redirect to login
+      }
+    })
+    .then(results => {
+      //console.log('CREATED USER');
+      res.redirect("/");
+      next();
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
     })
     .catch(err => {
       throw err;
     });
+<<<<<<< HEAD
   // .then(results => {
   //   if (results) {
   //     var userId = results.insertId;
@@ -173,6 +261,10 @@ app.post("/signup", (req, res, next) => {
   //   }
   //   next();
   // })
+=======
+  // Getting HTTP error:
+  // Unhandled rejection Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+>>>>>>> b0c01c4001aee1fc24704f50f7d79347e570eabc
 });
 
 /************************************************************/
