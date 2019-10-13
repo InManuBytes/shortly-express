@@ -146,19 +146,16 @@ app.post("/signup", (req, res, next) => {
         // " Unhandled rejection Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
         // it would go into the other ".then"s and try to redirect the user again to res.redirect('/')
         return models.Users.create(req.body)
-          .then(results => {
+          .then(user => {
             // after we create a new user we want to create a new session for them?
-            var userId = results.insertId;
-            console.log(
-              "USER CREATED - CREATING A SESSION FOR USER ID:",
-              userId
-            );
-            return models.Sessions.create({ userId });
-          })
-          .then(results => {
-            console.log("CREATED USER AND SESSION");
-            res.redirect("/");
-            next();
+            var userId = user.insertId;
+            console.log("USER CREATED - CREATING A SESSION FOR USER ID:", userId, 'SESSION', req.session);
+            return models.Sessions.update({hash: req.session.hash}, {userId: userId})
+              .then(update => {
+                console.log("CREATED USER AND ASSIGNED SESSION", update);
+                res.redirect("/");
+                next();
+              });
           });
       } // end of block for creating new users
     })

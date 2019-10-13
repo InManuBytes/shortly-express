@@ -1,7 +1,7 @@
 const models = require('../models');
 const Promise = require('bluebird');
 
-// In middleware/auth.js, write a createSession middleware function that accesses the parsed cookies on the request, looks up the user data related to that session, and assigns an object to a session property on the request that contains relevant user information. (Ask yourself: what information about the user would you want to keep in this session object?) -- Stuff related to links?
+// In middleware/auth.js, write a createSession middleware function that accesses the parsed cookies on the request, looks up the user data related to that session, and assigns an object to a session property on the request that contains relevant user information. (Ask yourself: what information about the user would you want to keep in this session object?) --
 // Things to keep in mind:
 // An incoming request with no cookies should generate a session with a unique hash and store it in the sessions database. The middleware function should use this unique hash to set a cookie in the response headers. (Ask yourself: How do I set cookies using Express?).
 // If an incoming request has a cookie, the middleware should verify that the cookie is valid (i.e., it is a session that is stored in your database).
@@ -36,7 +36,7 @@ module.exports.createSession = (req, res, next) => {
           res.clearCookie('shortlyid');
           return module.exports._createNewSessionSetCookies(req, res, next);
         } else {
-          console.log('COOKIES VALID, ASSIGNING SESSION');
+          console.log('COOKIES VALID, ASSIGNING SESSION TO:', record);
           req.session = {'hash': record.hash};
           req.session.userId = record.userId;
           if (record.user) {
